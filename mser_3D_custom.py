@@ -113,22 +113,9 @@ def MSER_most_stable(img, loc_max, min_area = 100, max_area = 2000, max_rel_inst
 if __name__ == "__main__": 
     
     
-    img = np.load("01.npy")
-    img = img.transpose((1,2,0))
-    img = img[50:-50,50:-50,:]
-    img = gaussian(img,1)
+    img = np.load("test_file.npy")
 
-
-    # img = img[300:600,500:800,:]
-
-
-
-
-    img = (img - np.min(img))/(np.max(img) - np.min(img))
-    img[img<0] = 0
-    img[img>1] = 1
-    img = np.round((img*255)).astype(np.uint8)
-
+    
 
     plt.figure(figsize=(15,15))
     plt.imshow(img[:,:,25])
