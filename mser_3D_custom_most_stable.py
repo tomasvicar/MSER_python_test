@@ -12,10 +12,10 @@ from skimage.measure import regionprops
 img = np.load(r"..\0001\01.npy")
 img = img.transpose((1,2,0))
 img = img[50:-50,50:-50,:]
-img = gaussian(img,2)
+img = gaussian(img,1)
 
 
-img = img[300:600,500:800,:]
+# img = img[300:600,500:800,:]
 
 
 
@@ -31,20 +31,18 @@ plt.show()
 
 
 
-min_dist = 20
-min_value = 0.6
+min_dist = 5
+min_value = 50
 loc_max = peak_local_max(img,min_distance=min_dist,threshold_abs=min_value)
 
 
 
 
 
-min_area = 200
-max_area = 5000
+min_area = 100
+max_area = 2000
 delta = 2
-
-
-
+max_rel_instability = 1.0
 
 
 
@@ -86,15 +84,14 @@ for t_num,t in enumerate(ts):
         
         
   
-step = 1
-max_rel_instability = 1.0
-diffs = sizes - np.roll(sizes, step, axis=1)
-    
-diffs[:,:step] = 9999999 
-diffs[:,-step:] = 9999999
-diffs[sizes<min_area] = 9999999
-diffs[sizes>max_area] = 9999999
 
+diffs = (sizes - np.roll(sizes, 1, axis=1)).astype(np.float64)
+    
+
+diffs[:,:1] = np.Inf 
+diffs[:,-1:] = np.Inf 
+diffs[sizes<min_area] = np.Inf 
+diffs[sizes>max_area] = np.Inf 
 
 
     
@@ -103,6 +100,7 @@ sizes[sizes == 0] = 0.0001
 diffs = diffs/sizes
 
 result = np.zeros(img.shape)
+region_id = 0
 for row_num in range(diffs.shape[0]): 
 
     diffs_row = diffs[row_num,:]
@@ -118,23 +116,23 @@ for row_num in range(diffs.shape[0]):
     
     t = ts[min_pos]
     
-    L = label(img>t)[0]
+    L,drop = label(img>t)
     
-    stable_reg = L == L[loc_max_l==(row_num+1)]
-    
-    # plt.figure(figsize=(15,15))
-    # plt.imshow(stable_reg)
-    # plt.show()
+    stable_reg = L == L[loc_max[row_num,0],loc_max[row_num,1],loc_max[row_num,2]]
     
     
-    result = result + stable_reg
-    
-    
-    
-plt.imshow(np.max(result,axis=2))
 
-
-
+    
+    
+    result[stable_reg]  = region_id
+    region_id = region_id +1
+    
+    
+    
+tmp = result[:,:,25]
+plt.figure(figsize=(15,15))
+plt.imshow(result[:,:,25])
+plt.show()
 
 
 
